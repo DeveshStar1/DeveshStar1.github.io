@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devesh | Data Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --surface: #0a0f1e;
+    --accent: #00f5d4;
+    --accent2: #7b2fff;
+    --accent3: #ff6b35;
+    --text: #e8eaf6;
+    --muted: #4a5278;
+    --card-bg: rgba(10,15,35,0.85);
+    --glow: 0 0 40px rgba(0,245,212,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 40px; height: 40px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.2s ease;
+    opacity: 0.5;
+  }
+
+  /* CANVAS */
+  #bg-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(5,8,16,0.6);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0,245,212,0.08);
+  }
+
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* SECTIONS */
+  section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+
+  /* HERO */
+  #hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 8vw;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-name {
+    font-size: clamp(4rem, 10vw, 9rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-name span {
+    display: block;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 60%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-title {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(232,234,246,0.7);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .btn-primary {
+    padding: 0.9rem 2.2rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  .btn-primary:hover { transform: scale(1.04); }
+
+  .btn-outline {
+    padding: 0.9rem 2.2rem;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(0,245,212,0.4);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: none;
+    transition: all 0.3s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  .btn-outline:hover {
+    background: rgba(0,245,212,0.08);
+    border-color: var(--accent);
+  }
+
+  .hero-stats {
+    position: absolute;
+    right: 8vw;
+    bottom: 12vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+
+  .stat-item {
+    text-align: right;
+  }
+
+  .stat-num {
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.4s forwards;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  .scroll-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+
+  .section-line {
+    height: 1px;
+    width: 60px;
+    background: linear-gradient(to right, var(--accent), transparent);
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  /* ABOUT */
+  #about {
+    padding: 10rem 8vw;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .about-text p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: rgba(232,234,246,0.75);
+    margin-bottom: 1.5rem;
+  }
+
+  .about-visual {
+    position: relative;
+    height: 420px;
+  }
+
+  #skills-3d {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .skill-chip {
+    padding: 0.5rem 1rem;
+    background: rgba(0,245,212,0.06);
+    border: 1px solid rgba(0,245,212,0.2);
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    transition: all 0.3s;
+  }
+
+  .skill-chip:hover {
+    background: rgba(0,245,212,0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,245,212,0.15);
+  }
+
+  /* EXPERIENCE */
+  #experience {
+    padding: 8rem 8vw;
+    background: radial-gradient(ellipse at 80% 50%, rgba(123,47,255,0.05) 0%, transparent 60%);
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 5rem;
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .timeline-item.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -3.4rem;
+    top: 0.5rem;
+    width: 14px; height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0,245,212,0.5);
+  }
+
+  .timeline-dot.purple { background: var(--accent2); box-shadow: 0 0 20px rgba(123,47,255,0.5); }
+  .timeline-dot.orange { background: var(--accent3); box-shadow: 0 0 20px rgba(255,107,53,0.5); }
+
+  .timeline-period {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .timeline-role {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+  }
+
+  .timeline-tech {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.2rem;
+  }
+
+  .timeline-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 4px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .timeline-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  }
+
+  .timeline-card:hover {
+    border-color: rgba(0,245,212,0.2);
+    box-shadow: var(--glow);
+  }
+
+  .timeline-card.purple::before { background: linear-gradient(to bottom, var(--accent2), var(--accent3)); }
+  .timeline-card.orange::before { background: linear-gradient(to bottom, var(--accent3), var(--accent)); }
+
+  .timeline-desc {
+    font-size: 0.95rem;
+    color: rgba(232,234,246,0.65);
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+
+  .timeline-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .timeline-bullets li {
+    font-size: 0.88rem;
+    color: rgba(232,234,246,0.7);
+    padding-left: 1.2rem;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .timeline-bullets li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.75rem;
+  }
+
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .tech-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.7rem;
+    background: rgba(123,47,255,0.1);
+    border: 1px solid rgba(123,47,255,0.25);
+    color: #a78bfa;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  /* CERTIFICATIONS */
+  #certifications {
+    padding: 8rem 8vw;
+    background: radial-gradient(ellipse at 20% 50%, rgba(0,245,212,0.04) 0%, transparent 60%);
+  }
+
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .cert-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 4px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: none;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .cert-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .cert-card:hover {
+    border-color: rgba(0,245,212,0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,245,212,0.08);
+  }
+
+  .cert-icon {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: var(--bg);
+    letter-spacing: 0.05em;
+  }
+
+  .cert-info h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .cert-info p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* EDUCATION */
+  #education {
+    padding: 8rem 8vw;
+  }
+
+  .edu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .edu-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 4px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .edu-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .edu-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(0,245,212,0.08), transparent);
+    border-radius: 50%;
+    transform: translate(30px, -30px);
+  }
+
+  .edu-card:hover {
+    border-color: rgba(0,245,212,0.2);
+    box-shadow: var(--glow);
+  }
+
+  .edu-year {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+
+  .edu-degree {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .edu-school {
+    font-size: 0.85rem;
+    color: rgba(232,234,246,0.55);
+    line-height: 1.5;
+  }
+
+  /* AWARD */
+  #award {
+    padding: 6rem 8vw;
+    text-align: center;
+  }
+
+  .award-showcase {
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 4rem;
+    background: radial-gradient(ellipse at center, rgba(123,47,255,0.12) 0%, rgba(0,245,212,0.05) 50%, transparent 70%);
+    border: 1px solid rgba(123,47,255,0.2);
+    border-radius: 4px;
+  }
+
+  .award-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .award-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+  }
+
+  .award-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* CONTACT */
+  #contact {
+    padding: 8rem 8vw;
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(0,245,212,0.04) 0%, transparent 60%);
+  }
+
+  .contact-card {
+    max-width: 600px;
+    margin: 3rem auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.2rem 2rem;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.3s;
+  }
+
+  .contact-item:hover {
+    border-color: rgba(0,245,212,0.25);
+    transform: translateX(8px);
+    box-shadow: var(--glow);
+  }
+
+  .contact-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    width: 90px;
+    flex-shrink: 0;
+  }
+
+  .contact-value {
+    font-size: 0.95rem;
+    color: rgba(232,234,246,0.8);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 8vw;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.5; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(0.6); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes rotate3d {
+    from { transform: rotateY(0deg) rotateX(15deg); }
+    to { transform: rotateY(360deg) rotateX(15deg); }
+  }
+
+  /* FLOATING BADGES */
+  .floating-badge {
+    position: absolute;
+    background: rgba(10,15,35,0.9);
+    border: 1px solid rgba(0,245,212,0.2);
+    border-radius: 4px;
+    padding: 0.75rem 1.2rem;
+    backdrop-filter: blur(10px);
+    animation: float 4s ease-in-out infinite;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+
+  .badge-1 { top: 15%; right: 5%; animation-delay: 0s; }
+  .badge-2 { top: 45%; right: 2%; animation-delay: 1s; }
+  .badge-3 { bottom: 20%; right: 8%; animation-delay: 2s; }
+
+  /* 3D CUBE */
+  .cube-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 800px;
+  }
+
+  .cube {
+    width: 200px;
+    height: 200px;
+    transform-style: preserve-3d;
+    animation: rotate3d 12s linear infinite;
+    position: relative;
+  }
+
+  .cube-face {
+    position: absolute;
+    width: 200px; height: 200px;
+    background: rgba(0,245,212,0.04);
+    border: 1px solid rgba(0,245,212,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .cube-face.front  { transform: translateZ(100px); }
+  .cube-face.back   { transform: rotateY(180deg) translateZ(100px); }
+  .cube-face.left   { transform: rotateY(-90deg) translateZ(100px); }
+  .cube-face.right  { transform: rotateY(90deg) translateZ(100px); }
+  .cube-face.top    { transform: rotateX(90deg) translateZ(100px); }
+  .cube-face.bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--accent), var(--accent2));
+    z-index: 200;
+    transition: width 0.1s;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+    #hero { padding: 0 1.5rem; }
+    .hero-stats { display: none; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .about-visual { height: 300px; }
+    .cert-grid { grid-template-columns: 1fr; }
+    .edu-grid { grid-template-columns: 1fr; }
+    .floating-badge { display: none; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">D E V E S H</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#certifications">Certs</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-tag">// Azure Data Engineer</div>
+  <h1 class="hero-name">
+    <span>DEVESH</span>
+  </h1>
+  <p class="hero-title">Building the Future of Data at Scale</p>
+  <p class="hero-desc">
+    Azure Data Engineer with 5+ years of experience designing and developing scalable ETL pipelines, Medallion architectures, and data ingestion solutions on Azure — spanning finance, banking, and global enterprises.
+  </p>
+  <div class="hero-cta">
+    <a href="#experience" class="btn-primary">View Journey</a>
+    <a href="#contact" class="btn-outline">Get In Touch</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">5+</div>
+      <div class="stat-label">Years Experience</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Major Projects</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Azure Certifications</div>
+    </div>
+  </div>
+
+  <!-- Floating badges -->
+  <div class="floating-badge badge-1">⬡ Databricks</div>
+  <div class="floating-badge badge-2">⬡ ADF Pipelines</div>
+  <div class="floating-badge badge-3">⬡ Medallion Arch</div>
+
+  <div class="scroll-indicator">
+    <span class="scroll-text">Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <div class="section-line"></div>
+    <h2 class="section-title">About Me</h2>
+  </div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>I'm a results-driven Azure Data Engineer passionate about transforming raw data into actionable intelligence. With expertise in cloud-native data architectures, I build robust, scalable ETL pipelines that power critical business decisions.</p>
+      <p>From leading teams on large-scale data ingestion modernization for global food & beverage leaders to architecting Medallion layers for banking risk analytics, I thrive at the intersection of technology and business impact.</p>
+      <p>Currently based in Gurgaon, India — open to exciting opportunities in data engineering leadership.</p>
+      <div class="skills-grid">
+        <span class="skill-chip">Azure Data Factory</span>
+        <span class="skill-chip">Databricks</span>
+        <span class="skill-chip">ADLS</span>
+        <span class="skill-chip">Azure DevOps</span>
+        <span class="skill-chip">SQL</span>
+        <span class="skill-chip">Unity Catalog</span>
+        <span class="skill-chip">CI/CD Pipelines</span>
+        <span class="skill-chip">Medallion Architecture</span>
+        <span class="skill-chip">ETL Design</span>
+        <span class="skill-chip">Data Quality</span>
+      </div>
+    </div>
+    <div class="about-visual">
+      <div class="cube-container">
+        <div class="cube">
+          <div class="cube-face front">AZURE<br>DATA<br>FACTORY</div>
+          <div class="cube-face back">DATABRICKS<br>SPARK</div>
+          <div class="cube-face left">MEDALLION<br>ARCH</div>
+          <div class="cube-face right">ADLS<br>GEN2</div>
+          <div class="cube-face top">CI/CD<br>DEVOPS</div>
+          <div class="cube-face bottom">UNITY<br>CATALOG</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <div class="section-line"></div>
+    <h2 class="section-title">Professional Journey</h2>
+  </div>
+  <div class="timeline">
+
+    <!-- Job 1 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-period">OCT 2023 — JUL 2025</div>
+      <div class="timeline-role">Project Lead — CFIN & PAPM Data Ingestion</div>
+      <div class="timeline-tech">Data Ingestion & Analytics Modernization · Global Food & Beverage Leader</div>
+      <div class="timeline-card">
+        <p class="timeline-desc">Led end-to-end delivery of a large-scale Azure data ingestion and analytics modernization initiative, managing both technical architecture and cross-functional stakeholder relationships.</p>
+        <ul class="timeline-bullets">
+          <li>Acted as Project Lead, managing end-to-end delivery and business alignment</li>
+          <li>Led a team of Data Engineers designing ADF & Databricks ETL pipelines at scale</li>
+          <li>Defined and enforced best practices for logging, exception handling, and Data Quality (DQ) frameworks</li>
+          <li>Directed development of real-time monitoring dashboards for proactive issue detection</li>
+          <li>Spearheaded CI/CD pipeline setup in Azure DevOps for streamlined monthly releases</li>
+          <li>Coordinated with Finance & Performance business stakeholders on technical requirements</li>
+          <li>Mentored junior engineers, conducted code reviews, and upheld delivery timelines</li>
+        </ul>
+        <div class="tech-tags">
+          <span class="tech-tag">Databricks</span>
+          <span class="tech-tag">ADLS</span>
+          <span class="tech-tag">ADF</span>
+          <span class="tech-tag">Azure DevOps</span>
+          <span class="tech-tag">CI/CD</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job 2 -->
+    <div class="timeline-item">
+      <div class="timeline-dot purple"></div>
+      <div class="timeline-period">OCT 2022 — OCT 2023</div>
+      <div class="timeline-role">Data Engineer — Market Risk</div>
+      <div class="timeline-tech">Banking Data Migration & Lakehouse Architecture</div>
+      <div class="timeline-card purple">
+        <p class="timeline-desc">Designed and implemented a scalable cloud architecture for migrating large volumes of unstructured Excel files from on-premises network drives to Azure Data Lake Storage, enabling centralized reporting and governance.</p>
+        <ul class="timeline-bullets">
+          <li>Led a team of 3 engineers building scalable ETL processes for diverse file formats</li>
+          <li>Designed and implemented Medallion Architecture (Bronze, Silver, Gold) in ADLS & Databricks</li>
+          <li>Leveraged Unity Catalog as the centralized governance and metadata repository</li>
+          <li>Built and enforced Data Quality (DQ) frameworks for accuracy and consistency</li>
+          <li>Developed a parameterized execution framework for notebook orchestration</li>
+          <li>Translated complex data mappings into business-ready analytics assets</li>
+        </ul>
+        <div class="tech-tags">
+          <span class="tech-tag">Databricks</span>
+          <span class="tech-tag">Data Factory</span>
+          <span class="tech-tag">SQL</span>
+          <span class="tech-tag">Unity Catalog</span>
+          <span class="tech-tag">Medallion</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job 3 -->
+    <div class="timeline-item">
+      <div class="timeline-dot orange"></div>
+      <div class="timeline-period">JUN 2020 — OCT 2022</div>
+      <div class="timeline-role">Data Engineer — A4A Cost Management</div>
+      <div class="timeline-tech">Cloud Application Support & ETL Optimization · Global MNC</div>
+      <div class="timeline-card orange">
+        <p class="timeline-desc">Worked across multiple global Azure applications to implement enhancements and optimizations, providing critical production support and driving continuous improvement across ETL pipelines.</p>
+        <ul class="timeline-bullets">
+          <li>Provided L2/L3 support for 3–4 cloud-based applications, ensuring ETL stability</li>
+          <li>Monitored, analyzed, and resolved ETL pipeline errors within defined SLAs</li>
+          <li>Collaborated cross-functionally on root cause analysis and permanent fixes</li>
+          <li>Developed pipeline enhancements improving efficiency, maintainability, and scalability</li>
+        </ul>
+        <div class="tech-tags">
+          <span class="tech-tag">Azure Data Factory</span>
+          <span class="tech-tag">Az Automation</span>
+          <span class="tech-tag">Azure SQL</span>
+          <span class="tech-tag">Data Science</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <div class="section-line"></div>
+    <h2 class="section-title">Certifications</h2>
+  </div>
+  <div class="cert-grid">
+    <div class="cert-card">
+      <div class="cert-icon">AZ<br>900</div>
+      <div class="cert-info">
+        <h3>Azure Fundamentals</h3>
+        <p>Microsoft Azure · AZ-900</p>
+      </div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-icon">DP<br>900</div>
+      <div class="cert-info">
+        <h3>Azure Data Fundamentals</h3>
+        <p>Microsoft Azure · DP-900</p>
+      </div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-icon">DP<br>203</div>
+      <div class="cert-info">
+        <h3>Data Engineer Associate</h3>
+        <p>Microsoft Azure · DP-203</p>
+      </div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-icon">AZ<br>104</div>
+      <div class="cert-info">
+        <h3>Azure Administrator Associate</h3>
+        <p>Microsoft Azure · AZ-104</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <div class="section-line"></div>
+    <h2 class="section-title">Education</h2>
+  </div>
+  <div class="edu-grid">
+    <div class="edu-card">
+      <div class="edu-year">2016 — 2020</div>
+      <div class="edu-degree">B.Tech in Computer Science & Engineering</div>
+      <div class="edu-school">Dr. A.P.J. Abdul Kalam Technical University (AKTU), Lucknow</div>
+    </div>
+    <div class="edu-card">
+      <div class="edu-year">2015</div>
+      <div class="edu-degree">Class XII (ISC)</div>
+      <div class="edu-school">St. Mary's School · ICSE Board</div>
+    </div>
+    <div class="edu-card">
+      <div class="edu-year">2013</div>
+      <div class="edu-degree">Class X (ICSE)</div>
+      <div class="edu-school">St. Mary's School · ICSE Board</div>
+    </div>
+  </div>
+</section>
+
+<!-- AWARD -->
+<section id="award">
+  <div class="award-showcase">
+    <span class="award-icon">🏆</span>
+    <div class="award-title">Best Data Engineer 2023</div>
+    <div class="award-desc">Nominated · Aays Analytics</div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header" style="justify-content:center">
+    <span class="section-num">05</span>
+    <div class="section-line"></div>
+    <h2 class="section-title">Let's Connect</h2>
+  </div>
+  <p style="color:rgba(232,234,246,0.6); max-width:500px; margin:0 auto 3rem; font-size:1rem; line-height:1.7;">
+    Open to new opportunities, collaborations, and conversations about data engineering challenges.
+  </p>
+  <div class="contact-card">
+    <a class="contact-item" href="tel:+919958803416">
+      <span class="contact-label">Phone</span>
+      <span class="contact-value">+91 9958803416</span>
+    </a>
+    <a class="contact-item" href="#">
+      <span class="contact-label">Location</span>
+      <span class="contact-value">Gurgaon, India</span>
+    </a>
+    <a class="contact-item" href="https://www.linkedin.com" target="_blank">
+      <span class="contact-label">LinkedIn</span>
+      <span class="contact-value">linkedin.com/in/devesh →</span>
+    </a>
+    <a class="contact-item" href="#">
+      <span class="contact-label">Company</span>
+      <span class="contact-value">Aays Analytics</span>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Devesh · Data Engineer</p>
+  <p>Built with passion & Azure ☁</p>
+</footer>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 6 + 'px';
+    cursor.style.top = my - 6 + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx - 20 + 'px';
+    ring.style.top = ry - 20 + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  // PROGRESS BAR
+  const pb = document.getElementById('progressBar');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    pb.style.width = pct + '%';
+  });
+
+  // SCROLL REVEAL
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 120);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.timeline-item, .cert-card, .edu-card').forEach(el => observer.observe(el));
+
+  // PARTICLE CANVAS
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const N = 80;
+
+  for (let i = 0; i < N; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.5 + 0.5,
+      alpha: Math.random() * 0.4 + 0.1,
+      color: Math.random() > 0.5 ? '0,245,212' : '123,47,255'
+    });
+  }
+
+  let mouseX = canvas.width / 2, mouseY = canvas.height / 2;
+  window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.color},${p.alpha})`;
+      ctx.fill();
+    });
+
+    // Draw connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(0,245,212,${0.07 * (1 - dist / 120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+
+      // Mouse connections
+      const dx = particles[i].x - mouseX;
+      const dy = particles[i].y - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 180) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(mouseX, mouseY);
+        ctx.strokeStyle = `rgba(0,245,212,${0.15 * (1 - dist / 180)})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+</script>
+</body>
+</html>
